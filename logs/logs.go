@@ -3,14 +3,12 @@ package logs
 import (
 	"fmt"
 	c "templateApp/configs"
-	"templateApp/post"
+	"templateApp/mail"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
-
-var Logger *zap.Logger
 
 // General - элементарный логгер, используемый сразу после запуска
 func General() {
@@ -47,7 +45,7 @@ func Reconfigured() {
 			zap.AddStacktrace(zap.ErrorLevel),
 			zap.Hooks(func(e zapcore.Entry) error {
 				if e.Level >= zap.ErrorLevel {
-					return post.Send(
+					return mail.Send(
 						c.Settings.Post.Host,
 						c.Settings.Post.Port,
 						c.Settings.Post.Sender,
