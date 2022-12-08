@@ -1,0 +1,4 @@
+templateApp
+.vscode
+*.example
+*.log
