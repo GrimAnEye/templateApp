@@ -14,10 +14,8 @@ func main() {
 	//defer zap.L().Sync()
 
 	// Загрузка настроек из файла, либо создание шаблона
-	if settings, err := c.LoadConfig(c.TSettings{}); err != nil {
+	if err := c.GetConfig(&c.Settings, "configs"); err != nil {
 		zap.L().Fatal("ошибка загрузки настроек из файла", zap.Error(err))
-	} else {
-		c.Settings = settings
 	}
 
 	// После получения настроек, обновление логера

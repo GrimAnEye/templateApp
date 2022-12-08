@@ -46,11 +46,11 @@ func Reconfigured() {
 			zap.Hooks(func(e zapcore.Entry) error {
 				if e.Level >= zap.ErrorLevel {
 					return mail.Send(
-						c.Settings.Post.Host,
-						c.Settings.Post.Port,
-						c.Settings.Post.Sender,
-						c.Settings.Post.Recipient,
-						c.Settings.Post.Subject,
+						c.Settings.Mail.Host,
+						c.Settings.Mail.Port,
+						c.Settings.Mail.Sender,
+						c.Settings.Mail.Recipient,
+						c.Settings.Mail.Subject,
 						fmt.Sprintf("Error found:\r\n\r\n"+
 							"Level: %d\r\n"+
 							"Time: %s\r\n"+
