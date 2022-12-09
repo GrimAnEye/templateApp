@@ -11,7 +11,6 @@ func main() {
 
 	// Создание базового логера
 	logs.General()
-	//defer zap.L().Sync()
 
 	// Загрузка настроек из файла, либо создание шаблона
 	if err := c.GetConfig(&c.Settings, "configs"); err != nil {

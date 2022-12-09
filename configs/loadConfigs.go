@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
+	p "path/filepath"
 	"reflect"
 
 	yaml "gopkg.in/yaml.v3"
 )
 
-// GetConfig - получает указатель на проинициализированную переменную конфигурации и путь,
+// GetConfig - получает указатель на ИНИЦИАЛИЗИРОВАННУЮ переменную конфигурации и путь,
 // по которому она должна располагаться в файловой системе, относительно родительской директории.
 //
 // Проверяет наличие файла конфигурации по указанному пути,
@@ -23,12 +23,12 @@ func GetConfig[T any](v *T, configPath string) error {
 	var name string = reflect.TypeOf(*v).Name()
 
 	// Создание каталога настроек
-	if err := os.MkdirAll(filepath.FromSlash(configPath), 0744); err != nil {
+	if err := os.MkdirAll(p.FromSlash(configPath), 0744); err != nil {
 		return fmt.Errorf("ошибка создания каталога настроек: %w", err)
 	}
 
 	// Проверка существования файла настроек
-	if _, err := os.Stat(filepath.FromSlash(configPath + "/" + name + ".yaml")); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(p.Join(configPath, name+".yaml")); errors.Is(err, os.ErrNotExist) {
 
 		// В случае отсутствия файла настроек - создаю пустую структуру и кладу её в файл
 		return newConfig(v, &name, &configPath)
@@ -52,7 +52,7 @@ func newConfig[T any](v *T, name, configPath *string) error {
 	}
 
 	// Записываю шаблон в файл
-	if err = os.WriteFile(filepath.FromSlash(*configPath+"/"+*name+".yaml.example"), data, 0640); err != nil {
+	if err = os.WriteFile(p.Join(*configPath, *name+".yaml.example"), data, 0640); err != nil {
 
 		return fmt.Errorf("ошибка записи структуры в файл %s.yaml.example: %w", *name, err)
 	}
@@ -62,7 +62,7 @@ func newConfig[T any](v *T, name, configPath *string) error {
 func loadConfig[T any](v *T, name, configPath *string) error {
 
 	// Получаю объект *.yaml
-	co, err := os.Open(*configPath + "/" + *name + ".yaml")
+	co, err := os.Open(p.Join(*configPath, *name+".yaml"))
 	if err != nil {
 		return fmt.Errorf("ошибка открытия файла %s.yaml: %w", *name, err)
 	}

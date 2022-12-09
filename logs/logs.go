@@ -2,6 +2,7 @@ package logs
 
 import (
 	"fmt"
+	"path/filepath"
 	c "templateApp/configs"
 	"templateApp/mail"
 
@@ -9,6 +10,8 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
+
+const LogPathDefault = "logs"
 
 // General - элементарный логгер, используемый сразу после запуска
 func General() {
@@ -23,7 +26,14 @@ func General() {
 //	проводит ротацию устаревших журналов
 func Reconfigured() {
 	w := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   "logs/logs.log",
+
+		Filename: filepath.Join(func() string {
+			if c.Settings.Logs.Path != "" {
+				return c.Settings.Logs.Path
+			}
+			return LogPathDefault
+		}(), "logs.log"),
+
 		MaxSize:    c.Settings.Logs.MaxSize,
 		MaxBackups: c.Settings.Logs.MaxBackups,
 		MaxAge:     c.Settings.Logs.MaxAgeDays,
@@ -44,26 +54,32 @@ func Reconfigured() {
 			core,
 			zap.AddStacktrace(zap.ErrorLevel),
 			zap.Hooks(func(e zapcore.Entry) error {
-				if e.Level >= zap.ErrorLevel {
-					return mail.Send(
-						c.Settings.Mail.Host,
-						c.Settings.Mail.Port,
-						c.Settings.Mail.Sender,
-						c.Settings.Mail.Recipient,
-						c.Settings.Mail.Subject,
-						fmt.Sprintf("Error found:\r\n\r\n"+
-							"Level: %d\r\n"+
-							"Time: %s\r\n"+
-							"LoggerName: %s\r\n"+
-							"Message: %s\r\n"+
-							"Caller: %s\r\n"+
-							"Stack: %s\r\n",
-							e.Level,
-							e.Time.Format("2006.01.02 15:04:05 -07:00"),
-							e.LoggerName,
-							e.Message,
-							e.Caller.FullPath(),
-							e.Stack))
+
+				// Если задан почтовый хост для отправки уведомлений
+				// и сообщение об ошибке или хуже, отправляю уведомление на почту
+				if c.Settings.Mail.Host != "" {
+
+					if e.Level >= zap.ErrorLevel {
+						return mail.Send(
+							c.Settings.Mail.Host,
+							c.Settings.Mail.Port,
+							c.Settings.Mail.Sender,
+							c.Settings.Mail.Recipient,
+							c.Settings.Mail.Subject,
+							fmt.Sprintf("Error found:\r\n\r\n"+
+								"Level: %d\r\n"+
+								"Time: %s\r\n"+
+								"LoggerName: %s\r\n"+
+								"Message: %s\r\n"+
+								"Caller: %s\r\n"+
+								"Stack: %s\r\n",
+								e.Level,
+								e.Time.Format("2006.01.02 15:04:05 -07:00"),
+								e.LoggerName,
+								e.Message,
+								e.Caller.FullPath(),
+								e.Stack))
+					}
 				}
 				return nil
 			}),
