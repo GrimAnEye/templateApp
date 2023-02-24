@@ -3,7 +3,6 @@ package database
 
 import (
 	"fmt"
-	"time"
 
 	z "go.uber.org/zap"
 	"gorm.io/driver/postgres"
@@ -47,11 +46,11 @@ func Connect(
 		z.L().Error("ошибка при получении сырого подключения БД", z.Error(err))
 		return nil, err
 	}
-	rawDb.SetMaxIdleConns(2)
-	rawDb.SetConnMaxIdleTime(time.Minute * 30)
+	rawDb.SetMaxIdleConns(DatabaseConf.MaxIdleConns)
+	rawDb.SetConnMaxIdleTime(DatabaseConf.ConnMaxIdleTime)
 
-	rawDb.SetMaxOpenConns(20)
-	rawDb.SetConnMaxLifetime(time.Hour)
+	rawDb.SetMaxOpenConns(DatabaseConf.MaxOpenConns)
+	rawDb.SetConnMaxLifetime(DatabaseConf.ConnMaxLifeTime)
 
 	return db, nil
 }
