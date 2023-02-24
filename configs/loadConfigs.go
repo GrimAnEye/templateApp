@@ -7,6 +7,7 @@ import (
 	p "path/filepath"
 	"reflect"
 
+	z "go.uber.org/zap"
 	yaml "gopkg.in/yaml.v3"
 )
 
@@ -24,6 +25,7 @@ func GetConfig[T any](v *T, configPath string) error {
 
 	// Создание каталога настроек
 	if err := os.MkdirAll(p.FromSlash(configPath), 0744); err != nil {
+		z.L().Error("ошибка создания каталога настроек", z.Error(err))
 		return fmt.Errorf("ошибка создания каталога настроек: %w", err)
 	}
 

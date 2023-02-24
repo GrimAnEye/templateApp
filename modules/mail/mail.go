@@ -5,15 +5,13 @@ import (
 	"net/smtp"
 )
 
+// Send - отправляет почтовое уведомление подключившись к почтовому серверу
+// Авторизацию к серверу не проводит
 func Send(
-	host string,
-	port uint16,
+	host string, port uint16,
+	sender, recipient,
+	subject, text string,
 
-	sender,
-	recipient,
-
-	subject,
-	text string,
 ) error {
 	// Подключаюсь к smtp серверу
 	c, err := smtp.Dial(fmt.Sprintf("%s:%d", host, port))
